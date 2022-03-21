@@ -22,7 +22,7 @@ class App {
 
   private initializeDatabase() {
     mongoose
-      .connect('mongodb://localhost:27017/digital-account')
+      .connect(process.env.MONGO_URI || '')
       .then(() => {
         logging.info('Server', 'Mongo Connected');
       })
