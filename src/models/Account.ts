@@ -1,15 +1,27 @@
-import { Schema, model } from 'mongoose';
+import { model, Schema, Document, ObjectId } from 'mongoose';
 
-export interface Account {
+export interface IAccount extends Document {
+  _id?: ObjectId;
   name: string;
   document: string;
-  availableValue: number;
+  'available-value': number;
 }
 
-const schema = new Schema<Account>({
-  name: { type: String, required: true },
-  document: { type: String, required: true },
-  availableValue: { type: Number, required: true },
-});
+const AccountSchema: Schema = new Schema(
+  {
+    name: { type: String, required: true },
+    document: { type: String, required: true, unique: true },
+    'available-value': { type: Number, required: true },
+  },
+  {
+    toObject: {
+      transform(doc, ret) {
+        delete ret.__v;
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+  },
+);
 
-export const AccountModel = model<Account>('User', schema);
+export default model<IAccount>('Account', AccountSchema);
