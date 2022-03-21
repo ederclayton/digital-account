@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import accountRoutes from '@/routes/account';
-import transactionRoutes from '@/routes/transaction';
+import transferRoutes from '@/routes/transfer';
 
 const routes = Router();
 
-routes.use('/api/account', accountRoutes);
-routes.use('/api/transaction', transactionRoutes);
+routes.use('/account', accountRoutes);
+routes.use('/transfer', transferRoutes);
 
 export default routes;

@@ -32,7 +32,9 @@
           "ts": "never"
         }
       ],
-      "class-methods-use-this": "off"
+      "class-methods-use-this": "off",
+      "no-underscore-dangle": "off",
+      "no-param-reassign": "off"
     },
     "settings": {
       "import/resolver": {
