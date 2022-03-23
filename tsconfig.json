@@ -15,6 +15,10 @@
     "removeComments": true,
     "listFiles": false,
     "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types"
+    ], 
     "types": ["node", "jest"],
     "outDir": "dist",
     "baseUrl": "src",
