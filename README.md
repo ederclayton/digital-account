@@ -8,8 +8,17 @@ Como próximo passo de expansão dos produtos de nossa empresa, queremos lançar
 O projeto provê três rotas:
 
 - Criação de contas digitais.
+```bash
+  POST /api/account
+```
 - Transferencia entre contas (efetua uma transação atômica)
+```bash
+  POST /api/transfer
+```
 - Listagem de transações por conta
+```bash
+  GET /api/transfer/:accountId
+```
 
 ## ✔️ Técnicas e tecnologias utilizadas
 
