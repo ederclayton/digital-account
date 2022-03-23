@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import _ from 'lodash';
-import Account, { IAccount } from '@/models/Account';
-import logging from '@/config/logging';
+import Account, { IAccount } from '../models/Account';
+import logging from '../utils/logging';
 
 class AccountController {
   public async createAccount(req: Request, res: Response): Promise<void> {
@@ -26,11 +26,10 @@ class AccountController {
 
       logging.info('AccountController', `Conta criada com sucesso`, account);
 
-      res.json({ ...account.toObject() });
+      res.status(200).json({ ...account.toObject() });
     } catch (error) {
       logging.error('AccountController', error.message);
-
-      if (error.code) {
+      if (error.code === 11000) {
         res.status(400).json({ message: 'Conta já iniciada' });
       } else {
         res.status(500).json({ message: 'Erro Interno' });
@@ -48,8 +47,12 @@ class AccountController {
     receiverDocument: string,
     value: number,
   ): Promise<number | null> {
-    let senderNewAvailableValue: number | null = null;
     const session = await Account.startSession();
+
+    if (value <= 0) {
+      throw new Error('Invalid input value');
+    }
+
     session.startTransaction();
 
     try {
@@ -68,7 +71,7 @@ class AccountController {
       await Account.updateOne({ document: receiverDocument }, { $inc: { 'available-value': value } }, { session });
       await session.commitTransaction();
       await session.endSession();
-      senderNewAvailableValue = senderAccount['available-value'];
+      return senderAccount['available-value'];
     } catch (error) {
       logging.error('AccountController.transferBetweenAccounts', error.message);
       await session.abortTransaction();
@@ -76,8 +79,6 @@ class AccountController {
 
       throw error;
     }
-
-    return senderNewAvailableValue;
   }
 
   public async getAccountById(accountId: string): Promise<IAccount | null> {

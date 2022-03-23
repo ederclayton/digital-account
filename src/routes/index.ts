@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import accountRoutes from '@/routes/account';
-import transferRoutes from '@/routes/transfer';
+import accountRoutes from './account';
+import transferRoutes from './transfer';
 
 const routes = Router();
 

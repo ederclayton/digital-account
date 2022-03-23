@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import Transfer, { ITransfer } from '@/models/Transfer';
-import logging from '@/config/logging';
-import getPaginationData from '@/utils/getPaginationData';
+import Transfer, { ITransfer } from '../models/Transfer';
+import logging from '../utils/logging';
+import getPaginationData from '../utils/getPaginationData';
 import AccountController from './Account';
 
 const TWO_MINUTES_IN_MILLISEC = 2 * 60 * 1000;
@@ -28,7 +28,7 @@ class TransferController {
     return true;
   }
 
-  public async createTransfer(req: Request, res: Response): Promise<void> {
+  public async executeTransfer(req: Request, res: Response): Promise<void> {
     try {
       const transfer: ITransfer = new Transfer({
         'sender-document': req.body['sender-document'],
@@ -40,6 +40,7 @@ class TransferController {
         !transfer['sender-document'] ||
         !transfer['receiver-document'] ||
         !transfer.value ||
+        transfer.value <= 0 ||
         transfer['sender-document'] === transfer['receiver-document']
       ) {
         res.status(400).json({ message: 'Dados inválidos' });
@@ -95,38 +96,43 @@ class TransferController {
     const { accountId } = req.params;
     const { limit, page } = getPaginationData(String(req.query.limit), String(req.query.page));
 
-    const account = await AccountController.getAccountById(accountId);
-    if (!account) {
-      res.sendStatus(404).json({ message: 'Usuário não encontrado' });
-      return;
+    try {
+      const account = await AccountController.getAccountById(accountId);
+      if (!account) {
+        res.status(404).json({ message: 'Usuário não encontrado' });
+        return;
+      }
+
+      const totalDocs = await Transfer.find({
+        $or: [{ 'receiver-document': account.document }, { 'sender-document': account.document }],
+      }).count();
+
+      const transfers = await Transfer.find({
+        $or: [{ 'receiver-document': account.document }, { 'sender-document': account.document }],
+      })
+        .sort({ _id: -1 })
+        .skip(limit * (page - 1))
+        .limit(limit)
+        .lean();
+
+      const totalPages = Math.floor(totalDocs / limit) + 1;
+      const docs = transfers.map(transfer => {
+        return { id: transfer._id, ...transfer, __v: undefined, _id: undefined };
+      });
+
+      const result = {
+        page,
+        limit,
+        totalDocs,
+        totalPages,
+        docs,
+      };
+
+      res.json(result);
+    } catch (error) {
+      logging.error('TransferController', error.message);
+      res.status(500).json({ message: 'Erro Interno' });
     }
-
-    const totalDocs = await Transfer.find({
-      $or: [{ 'receiver-document': account.document }, { 'sender-document': account.document }],
-    }).count();
-
-    const transfers = await Transfer.find({
-      $or: [{ 'receiver-document': account.document }, { 'sender-document': account.document }],
-    })
-      .sort({ _id: -1 })
-      .skip(limit * (page - 1))
-      .limit(limit)
-      .lean();
-
-    const totalPages = Math.floor(totalDocs / limit) + 1;
-    const docs = transfers.map(transfer => {
-      return { id: transfer._id, ...transfer, __v: undefined, _id: undefined };
-    });
-
-    const result = {
-      page,
-      limit,
-      totalDocs,
-      totalPages,
-      docs,
-    };
-
-    res.json(result);
   }
 }
 

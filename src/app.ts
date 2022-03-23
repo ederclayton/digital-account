@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
 
-import logging from '@/config/logging';
-import routes from '@/routes';
+import logging from './utils/logging';
+import routes from './routes';
 
 class App {
   public app: Application;
