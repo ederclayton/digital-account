@@ -29,10 +29,6 @@ Para executar a funcionalidade de transações do MongoDB é necessário utiliza
 - Para a rota de listagem de transações, é necessário o id da conta para acessar os dados. Fiz isso principalmente porque é uma quebra de segurança utilizar o documento diretamente na url.
 - Usei paginação na rota de listagens de transações, com valores default para limite e página atual.
 
-## 📁 Acesso ao projeto
-
-**Indique como é possível baixar ou acessar o código fonte do projeto, seja projeto inicial ou final**
-
 ## 🛠️ Execução do projeto
 
 Para executar o projeto é necessário ter instalado o NodeJs v16.14 ou superior.
